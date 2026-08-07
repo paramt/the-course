@@ -1,0 +1,70 @@
+=== THE COURSE — PREFLOP RANGES (Miller, $1/$2 live) ===
+
+--- OPENING (no raise in front) — RAISE, never limp ---
+
+EP (UTG to 2 off button), 14%:
+22+,A2s+,KTs+,QTs+,JTs-76s,AKo,AQo
+
+CO, 22%:
+22+,A2s+,K7s+,Q9s+,JTs-43s,J9s-53s,ATo+,KJo+
+
+BTN, 33%:
+22+,A2s+,K2s+,Q5s+,J7s+,T9s-43s,T8s-53s,T7s-96s,A7o+,K9o+,QTo+,JTo
+
+BLINDS vs limpers — raise:
+99+,ATs+,KJs+,AQo+
+(add A5s-A2s,K8s,76s if there's a real chance everyone folds)
+
+SB complete-or-fold in limped pot:
+Fold unconnected offsuit with no card above a jack (J4o, 96o, 52o, T3o).
+Complete everything else.
+
+
+--- vs TIGHT RAISE (he limps weak hands) — same from EP, CO, BTN, blinds ---
+
+3-bet:
+KK+,A5s
+
+Call:
+QQ-22,ATs+,KTs+,QTs+,JTs-76s,AKo
+
+
+--- vs LOOSE RAISE (he raises anything / never limps) ---
+
+EP 3-bet (also blinds vs loose EP raise):
+QQ+,AKs,A5s-A2s,T9s,87s,AKo
+
+EP call:
+JJ-22,AQs-A6s,KTs+,QTs+,JTs,98s,76s,AQo
+
+CO 3-bet:
+JJ+,AKs,A7s,A5s-A2s,T9s,87s,54s,AKo
+
+CO call:
+TT-22,AQs-A8s,A6s,K9s+,Q9s+,JTs,98s,76s-65s,J9s-86s,AQo-AJo,KQo
+(optional trim: ATo,KJo,K8s-K7s,43s,75s-53s)
+
+BTN 3-bet:
+99+,AKs-ATs,A5s-A2s,KQs-KJs,QJs,JTs,97s,75s,AKo-AQo
+
+BTN call:
+88-22,A9s-A6s,KTs-K9s,QTs-Q9s,T9s-43s,J9s-T8s,86s,64s-53s,J8s-T7s,AJo-ATo,KQo-KJo
+
+
+--- vs STEAL RAISE (blinds only; folded to a late-position opener) — 36% defense ---
+
+3-bet (~16%):
+99+,44-22,A2s+,KJs+,K7s-K5s,Q9s,98s-54s,J9s-86s,AJo+,KQo
+
+Call:
+88-55,KTs-K8s,K4s-K2s,QJs-QTs,Q8s-Q5s,JTs-T9s,43s,75s-53s,J8s-96s,J7s,ATo-A8o,KJo-K9o,Q9o+,JTo-98o,J9o
+
+
+--- NOTES ---
+Raise-size threshold: small = under 3bb ($6 at 1/2), big = over. Nearly all live
+raises are big, so default to the big-raise guidelines from the blinds.
+vs a tight raise, position buys you nothing — same range from every seat.
+Not in this excerpt: iso-raising limpers from EP/CO/BTN. Default = your full
+positional opening range, sized 5-6bb + 1bb per limper.
+Do not use the steal-defense block until you confirm the button actually opens
+40%+ into folded blinds.
