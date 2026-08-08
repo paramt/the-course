@@ -5,6 +5,7 @@ import {
   ACTION_LABELS,
   CHARTS,
   chartActions,
+  chartDefault,
   compileChart,
   type ActionId,
 } from '../../lib/charts'
@@ -25,14 +26,14 @@ export default function ChartsView() {
   const modified = !!chartOverrides
 
   function effective(hc: HandClass): ActionId {
-    return chartOverrides?.[hc] ?? compiled.get(hc) ?? 'fold'
+    return chartOverrides?.[hc] ?? compiled.get(hc) ?? chartDefault(chart)
   }
 
   function cycleCell(hc: HandClass) {
     if (!editing) return
     const current = effective(hc)
     const nextAction = actions[(actions.indexOf(current) + 1) % actions.length]
-    const defaultAction = compiled.get(hc) ?? 'fold'
+    const defaultAction = compiled.get(hc) ?? chartDefault(chart)
     setOverrides((prev) => {
       const forChart = { ...prev[selected] }
       if (nextAction === defaultAction) delete forChart[hc]
@@ -45,19 +46,20 @@ export default function ChartsView() {
   }
 
   const rangeStrings = useMemo(() => {
+    const defaultAction = chartDefault(chart)
     return actions
-      .filter((a) => a !== 'fold')
+      .filter((a) => a !== defaultAction)
       .map((action) => {
         const set = new Set<HandClass>()
         for (let r = 0; r < 13; r++) {
           for (let c = 0; c < 13; c++) {
             const hc = gridClass(r, c)
-            if ((chartOverrides?.[hc] ?? compiled.get(hc) ?? 'fold') === action) set.add(hc)
+            if ((chartOverrides?.[hc] ?? compiled.get(hc) ?? defaultAction) === action) set.add(hc)
           }
         }
         return { action, range: renderRange(set) }
       })
-  }, [actions, compiled, chartOverrides])
+  }, [chart, actions, compiled, chartOverrides])
 
   return (
     <div className="charts-view">

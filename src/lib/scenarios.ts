@@ -3,6 +3,7 @@ import {
   CHARTS,
   CONTEXTS,
   POSITIONS,
+  chartDefault,
   chartIdFor,
   compileChart,
   type ActionId,
@@ -69,5 +70,5 @@ export function correctAction(
 ): ActionId {
   const override = overrides?.[chartId]?.[hc]
   if (override) return override
-  return compileChart(CHARTS[chartId]).get(hc) ?? 'fold'
+  return compileChart(CHARTS[chartId]).get(hc) ?? chartDefault(CHARTS[chartId])
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { handFamilyMatches, parseRange, parseRangeTokens, renderRange } from './range'
-import { CHARTS, chartIdFor, compileChart } from './charts'
+import { CHARTS, chartActions, chartDefault, chartIdFor, compileChart } from './charts'
 
 const sorted = (s: Set<string>) => [...s].sort()
 
@@ -141,12 +141,23 @@ describe('charts', () => {
     expect(map.get('72o')).toBeUndefined()
   })
 
-  it('sb-limped chart folds unconnected offsuit junk, completes the rest', () => {
-    const map = compileChart(CHARTS['sb-limped'])
+  it('SB vs limpers: raise the premium range, complete the rest, fold junk', () => {
+    const map = compileChart(CHARTS['sb-vs-limpers'])
+    expect(map.get('99')).toBe('raise')
+    expect(map.get('ATs')).toBe('raise')
     for (const hc of ['J4o', '96o', '52o', 'T3o']) expect(map.get(hc)).toBeUndefined()
     for (const hc of ['98o', 'Q2o', 'J4s', '22', 'A2o', 'JTo']) {
       expect(map.get(hc)).toBe('complete')
     }
+  })
+
+  it('BB vs limpers: raise the premium range, check everything else', () => {
+    const chart = CHARTS['bb-vs-limpers']
+    expect(chartDefault(chart)).toBe('check')
+    expect(chartActions(chart)).toEqual(['raise', 'check'])
+    const map = compileChart(chart)
+    expect(map.get('AQo')).toBe('raise')
+    expect(map.get('JTs')).toBeUndefined() // → checks via the default action
   })
 
   it('maps positions/contexts to the right charts', () => {
@@ -155,7 +166,8 @@ describe('charts', () => {
     expect(chartIdFor('BB', 'vs-loose-raise')).toBe('vs-loose-ep')
     expect(chartIdFor('BTN', 'vs-steal')).toBeNull()
     expect(chartIdFor('CO', 'vs-tight-raise')).toBe('vs-tight')
-    expect(chartIdFor('SB', 'sb-limped')).toBe('sb-limped')
-    expect(chartIdFor('BB', 'sb-limped')).toBeNull()
+    expect(chartIdFor('SB', 'vs-limpers')).toBe('sb-vs-limpers')
+    expect(chartIdFor('BB', 'vs-limpers')).toBe('bb-vs-limpers')
+    expect(chartIdFor('CO', 'vs-limpers')).toBeNull()
   })
 })

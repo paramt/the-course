@@ -9,7 +9,6 @@ export const POSITIONS: Position[] = ['EP', 'CO', 'BTN', 'SB', 'BB']
 export type Context =
   | 'unopened'
   | 'vs-limpers'
-  | 'sb-limped'
   | 'vs-tight-raise'
   | 'vs-loose-raise'
   | 'vs-steal'
@@ -17,7 +16,6 @@ export type Context =
 export const CONTEXTS: Context[] = [
   'unopened',
   'vs-limpers',
-  'sb-limped',
   'vs-tight-raise',
   'vs-loose-raise',
   'vs-steal',
@@ -26,29 +24,37 @@ export const CONTEXTS: Context[] = [
 export const CONTEXT_LABELS: Record<Context, string> = {
   unopened: 'Unopened pot',
   'vs-limpers': 'Blinds vs limpers',
-  'sb-limped': 'SB in limped pot',
   'vs-tight-raise': 'vs Tight raise',
   'vs-loose-raise': 'vs Loose raise',
   'vs-steal': 'Blinds vs steal',
 }
 
-export type ActionId = 'raise' | '3bet' | 'call' | 'complete' | 'fold'
+export type ActionId = 'raise' | '3bet' | 'call' | 'complete' | 'check' | 'fold'
 
 export const ACTION_LABELS: Record<ActionId, string> = {
   raise: 'Raise',
   '3bet': '3-bet',
   call: 'Call',
   complete: 'Complete',
+  check: 'Check',
   fold: 'Fold',
 }
 
 export interface ChartDef {
   id: string
   label: string
-  /** Non-fold actions in priority order; fold is implicit for everything else. */
+  /** Explicit actions in priority order; everything else gets defaultAction. */
   ranges: { action: ActionId; range: string }[]
+  /** Action for hands not in any range. Defaults to fold; the BB checks unraised pots. */
+  defaultAction?: ActionId
   notes?: string[]
 }
+
+export function chartDefault(chart: ChartDef): ActionId {
+  return chart.defaultAction ?? 'fold'
+}
+
+const BLINDS_VS_LIMPERS_RAISE = '99+,ATs+,KJs+,AQo+'
 
 // SB complete-or-fold in a limped pot: fold unconnected offsuit hands with no
 // card above a jack; complete everything else. Expanded to an explicit range.
@@ -94,20 +100,26 @@ export const CHARTS: Record<string, ChartDef> = {
     ],
     notes: ['Raise, never limp.'],
   },
-  'blinds-vs-limpers': {
-    id: 'blinds-vs-limpers',
-    label: 'Blinds vs limpers — raise',
-    ranges: [{ action: 'raise', range: '99+,ATs+,KJs+,AQo+' }],
+  'sb-vs-limpers': {
+    id: 'sb-vs-limpers',
+    label: 'SB vs limpers — raise, complete, or fold',
+    ranges: [
+      { action: 'raise', range: BLINDS_VS_LIMPERS_RAISE },
+      { action: 'complete', range: sbLimpedCompleteRange() },
+    ],
     notes: [
-      "Not graded: add A5s-A2s, K8s, 76s if there's a real chance everyone folds.",
+      "Not graded: add A5s-A2s, K8s, 76s to the raises if there's a real chance everyone folds.",
+      'Below the raising range: fold unconnected offsuit hands with no card above a jack (J4o, 96o, 52o, T3o). Complete everything else.',
     ],
   },
-  'sb-limped': {
-    id: 'sb-limped',
-    label: 'SB complete-or-fold in limped pot',
-    ranges: [{ action: 'complete', range: sbLimpedCompleteRange() }],
+  'bb-vs-limpers': {
+    id: 'bb-vs-limpers',
+    label: 'BB vs limpers — raise or check',
+    ranges: [{ action: 'raise', range: BLINDS_VS_LIMPERS_RAISE }],
+    defaultAction: 'check',
     notes: [
-      'Fold unconnected offsuit hands with no card above a jack (J4o, 96o, 52o, T3o). Complete everything else.',
+      "Not graded: add A5s-A2s, K8s, 76s if there's a real chance everyone folds.",
+      'Nobody raised, so anything below the raising range checks its option.',
     ],
   },
   'vs-tight': {
@@ -177,9 +189,9 @@ export function chartIdFor(position: Position, context: Context): string | null 
       if (position === 'BTN') return 'open-btn'
       return null
     case 'vs-limpers':
-      return position === 'SB' || position === 'BB' ? 'blinds-vs-limpers' : null
-    case 'sb-limped':
-      return position === 'SB' ? 'sb-limped' : null
+      if (position === 'SB') return 'sb-vs-limpers'
+      if (position === 'BB') return 'bb-vs-limpers'
+      return null
     case 'vs-tight-raise':
       return 'vs-tight'
     case 'vs-loose-raise':
@@ -192,12 +204,12 @@ export function chartIdFor(position: Position, context: Context): string | null 
   }
 }
 
-/** The non-fold actions the user can choose from for a chart, plus fold. */
+/** The actions the user can choose from for a chart, default action last. */
 export function chartActions(chart: ChartDef): ActionId[] {
-  return [...chart.ranges.map((r) => r.action), 'fold']
+  return [...chart.ranges.map((r) => r.action), chartDefault(chart)]
 }
 
-/** Compile a chart's range strings into a hand-class → action map (fold implicit). */
+/** Compile a chart's range strings into a hand-class → action map (default implicit). */
 export function compileChart(chart: ChartDef): Map<HandClass, ActionId> {
   const map = new Map<HandClass, ActionId>()
   for (const { action, range } of chart.ranges) {

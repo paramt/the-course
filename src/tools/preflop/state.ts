@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import type { Card, HandClass } from '../../lib/cards'
 import type { ActionId, Context, Position } from '../../lib/charts'
 import { DEFAULT_SETTINGS, type Settings } from '../../lib/scenarios'
@@ -28,8 +29,25 @@ const LOG_CAP = 1000
 
 export const EMPTY_TALLY: Tally = { correct: 0, wrong: 0, streak: 0 }
 
+// The 'sb-limped' context and the 'blinds-vs-limpers'/'sb-limped' charts were
+// merged into per-blind vs-limpers charts; migrate stored data from that era.
+function migrateLogEntry(e: LogEntry): LogEntry {
+  if ((e.context as string) === 'sb-limped') {
+    return { ...e, context: 'vs-limpers', chartId: 'sb-vs-limpers' }
+  }
+  if (e.chartId === 'blinds-vs-limpers') {
+    return { ...e, chartId: e.position === 'SB' ? 'sb-vs-limpers' : 'bb-vs-limpers' }
+  }
+  return e
+}
+
 export function useSettings() {
-  return useStoredState<Settings>('preflop:v1:settings', DEFAULT_SETTINGS)
+  const [settings, setSettings] = useStoredState<Settings>('preflop:v1:settings', DEFAULT_SETTINGS)
+  const migrated =
+    (settings.context as string) === 'sb-limped'
+      ? { ...settings, context: 'vs-limpers' as Context }
+      : settings
+  return [migrated, setSettings] as const
 }
 
 export function useTally() {
@@ -37,7 +55,9 @@ export function useTally() {
 }
 
 export function useLog() {
-  return useStoredState<LogEntry[]>('preflop:v1:log', [])
+  const [log, setLog] = useStoredState<LogEntry[]>('preflop:v1:log', [])
+  const migrated = useMemo(() => log.map(migrateLogEntry), [log])
+  return [migrated, setLog] as const
 }
 
 export function useChartOverrides() {

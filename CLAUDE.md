@@ -51,9 +51,13 @@ log, chart edits, settings) persists in localStorage under `the-course:`-prefixe
   seat: tight raise = UTG raiser, loose raise = seat just before hero, steal = BTN raiser.
   Exception: blinds vs a loose raise show the raiser at UTG+1 (a BTN raiser would be visually
   identical to a steal, and the chart covers a loose EP raise).
-- From the SB, "blinds vs limpers" and "SB limped pot" render identically on the table (two
-  limpers, action on hero). They are distinguished only by the action buttons offered
-  (Raise/Fold vs Complete/Fold), matching how the book splits the decision into two charts.
+- **Charts can have a non-fold default action** (`ChartDef.defaultAction`, read via
+  `chartDefault`). The book only gives a *raise* range for blinds vs limpers; hands outside it
+  must not grade as "fold" in an unraised pot. BB vs limpers defaults to **check**; SB vs
+  limpers layers raise > complete (the book's complete-or-fold rule) > fold. Never use a bare
+  `?? 'fold'` fallback when reading a compiled chart.
+- The old `sb-limped` context and `blinds-vs-limpers` chart were merged into
+  `sb-vs-limpers`/`bb-vs-limpers`; `state.ts` migrates stored logs/settings from those ids.
 - Conditional chart lines ("add A5s-A2s… if everyone might fold", "optional trim") are shown
   as notes but deliberately excluded from grading to keep answers deterministic.
 - Deploy is via `.github/workflows/deploy.yml` (actions/deploy-pages). Repo Settings → Pages →

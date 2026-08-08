@@ -9,6 +9,7 @@ import {
   CONTEXT_LABELS,
   POSITIONS,
   chartActions,
+  chartDefault,
   compileChart,
   type ActionId,
   type Context,
@@ -30,10 +31,10 @@ interface Result {
   ok: boolean
 }
 
-// Keyboard shortcuts: r → raise/3-bet, c → call/complete, f → fold.
+// Keyboard shortcuts: r → raise/3-bet, c → call/complete/check, f → fold.
 const KEY_MAP: Record<string, ActionId[]> = {
   r: ['raise', '3bet'],
-  c: ['call', 'complete'],
+  c: ['call', 'complete', 'check'],
   f: ['fold'],
 }
 
@@ -42,6 +43,7 @@ const ACTION_KEYS: Partial<Record<ActionId, string>> = {
   '3bet': 'R',
   call: 'C',
   complete: 'C',
+  check: 'C',
   fold: 'F',
 }
 
@@ -220,32 +222,42 @@ export default function Practice() {
         </div>
       </div>
 
-      <div className="quiz-card">
-        <Table position={scenario.position} context={scenario.context} cards={scenario.cards} />
+      <div className="practice-layout">
+        <div className="practice-main">
+          <Table position={scenario.position} context={scenario.context} cards={scenario.cards} />
 
-        {!result ? (
-          <div className="action-buttons">
-            {actions.map((a) => (
-              <button key={a} className={`btn-action act-${a}`} onClick={() => answer(a)}>
-                {ACTION_LABELS[a]} <kbd>{ACTION_KEYS[a]}</kbd>
+          {!result ? (
+            <div className="action-buttons">
+              {actions.map((a) => (
+                <button key={a} className={`btn-action act-${a}`} onClick={() => answer(a)}>
+                  {ACTION_LABELS[a]} <kbd>{ACTION_KEYS[a]}</kbd>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className={'feedback ' + (result.ok ? 'feedback-ok' : 'feedback-bad')}>
+              <p className="feedback-headline">
+                {result.ok ? 'Correct!' : 'Wrong'}
+                {!result.ok && (
+                  <>
+                    {' '}
+                    — you chose {ACTION_LABELS[result.chosen]}, the chart says{' '}
+                    <strong>{ACTION_LABELS[result.correct]}</strong>
+                  </>
+                )}
+              </p>
+              <p className="feedback-detail">
+                {hc} · {chart.label}
+              </p>
+              <button className="btn-action btn-next" onClick={next} autoFocus>
+                Next hand
               </button>
-            ))}
-          </div>
-        ) : (
-          <div className={'feedback ' + (result.ok ? 'feedback-ok' : 'feedback-bad')}>
-            <p className="feedback-headline">
-              {result.ok ? 'Correct!' : 'Wrong'}
-              {!result.ok && (
-                <>
-                  {' '}
-                  — you chose {ACTION_LABELS[result.chosen]}, the chart says{' '}
-                  <strong>{ACTION_LABELS[result.correct]}</strong>
-                </>
-              )}
-            </p>
-            <p className="feedback-detail">
-              {hc} · {chart.label}
-            </p>
+            </div>
+          )}
+        </div>
+
+        {result && (
+          <aside className="practice-side">
             {revealTokens.length > 0 && (
               <div className="range-reveal">
                 {revealTokens.map((r) => (
@@ -258,12 +270,11 @@ export default function Practice() {
             <HandGrid
               mini
               highlight={hc}
-              getAction={(h) => overrides[scenario.chartId]?.[h] ?? compiled.get(h) ?? 'fold'}
+              getAction={(h) =>
+                overrides[scenario.chartId]?.[h] ?? compiled.get(h) ?? chartDefault(chart)
+              }
             />
-            <button className="btn-action btn-next" onClick={next} autoFocus>
-              Next hand
-            </button>
-          </div>
+          </aside>
         )}
       </div>
     </div>

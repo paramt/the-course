@@ -38,7 +38,6 @@ function seatViews(position: Position, context: Context): SeatView[] {
     case 'unopened':
       break
     case 'vs-limpers':
-    case 'sb-limped':
       bet(1, 2, 'limp')
       bet(4, 2, 'limp')
       break

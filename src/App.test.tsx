@@ -99,6 +99,19 @@ it('reveals the relevant range family and a highlighted mini-grid after answerin
   expect(highlighted[0].textContent).toBe('54s')
 })
 
+it('JTs in the BB vs limpers is a correct check', () => {
+  renderAt({
+    pathname: '/preflop-training',
+    state: {
+      retry: { position: 'BB', context: 'vs-limpers', chartId: 'bb-vs-limpers', cards: ['Jc', 'Tc'] },
+    },
+  })
+  act(() => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', bubbles: true }))
+  })
+  expect(container.textContent).toContain('Correct!')
+})
+
 it('charts tab renders the 169-cell grid and edit mode cycles a cell', () => {
   renderAt('/preflop-training/charts')
   expect(container.querySelectorAll('.hand-grid .cell').length).toBe(169)
