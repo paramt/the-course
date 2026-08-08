@@ -19,6 +19,7 @@ import {
   correctAction,
   generateScenario,
   validContextsFor,
+  validPositionsFor,
   type Scenario,
 } from '../../lib/scenarios'
 import { EMPTY_TALLY, appendLog, useChartOverrides, useLog, useSettings, useTally } from './state'
@@ -76,28 +77,28 @@ export default function Practice() {
     setResult(null)
   }
 
-  function updatePosition(position: Position | 'random') {
-    const next = { ...settings, position }
-    if (
-      position !== 'random' &&
-      next.context !== 'random' &&
-      !validContextsFor(position).includes(next.context)
-    ) {
-      next.context = 'random'
-    }
-    applySettings(next)
+  function togglePosition(p: Position) {
+    const positions = settings.positions.includes(p)
+      ? settings.positions.filter((x) => x !== p)
+      : [...settings.positions, p]
+    applySettings({ ...settings, positions })
   }
 
-  function updateContext(context: Context | 'random') {
-    const next = { ...settings, context }
-    if (
-      context !== 'random' &&
-      next.position !== 'random' &&
-      !validContextsFor(next.position).includes(context)
-    ) {
-      next.position = 'random'
-    }
-    applySettings(next)
+  function toggleContext(c: Context) {
+    const contexts = settings.contexts.includes(c)
+      ? settings.contexts.filter((x) => x !== c)
+      : [...settings.contexts, c]
+    applySettings({ ...settings, contexts })
+  }
+
+  // Dim chips that can't combine with the other group's current selection.
+  const effPositions = settings.positions.length > 0 ? settings.positions : POSITIONS
+  const effContexts = settings.contexts.length > 0 ? settings.contexts : CONTEXTS
+  const positionDimmed = (p: Position) => !validContextsFor(p).some((c) => effContexts.includes(c))
+  const contextDimmed = (c: Context) => !validPositionsFor(c).some((p) => effPositions.includes(p))
+
+  function chipClass(on: boolean, dim: boolean) {
+    return 'chip' + (on ? ' chip-on' : '') + (dim ? ' chip-dim' : '')
   }
 
   function answer(chosen: ActionId) {
@@ -177,61 +178,56 @@ export default function Practice() {
 
   return (
     <div className="practice">
-      <div className="settings-bar">
-        <label>
-          Position
-          <select
-            value={settings.position}
-            onChange={(e) => updatePosition(e.target.value as Position | 'random')}
+      <div className="settings-panel">
+        <div className="chip-row">
+          <span className="chip-label">
+            Position{settings.positions.length === 0 && <em> · any</em>}
+          </span>
+          {POSITIONS.map((p) => (
+            <button
+              key={p}
+              className={chipClass(settings.positions.includes(p), positionDimmed(p))}
+              onClick={() => togglePosition(p)}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+        <div className="chip-row">
+          <span className="chip-label">
+            Situation{settings.contexts.length === 0 && <em> · any</em>}
+          </span>
+          {CONTEXTS.map((c) => (
+            <button
+              key={c}
+              className={chipClass(settings.contexts.includes(c), contextDimmed(c))}
+              onClick={() => toggleContext(c)}
+            >
+              {CONTEXT_LABELS[c]}
+            </button>
+          ))}
+        </div>
+        <div className="chip-row">
+          <label
+            className="skew-toggle"
+            title="Deal hands you can play (raise/call) as often as hands you fold, instead of their natural frequency"
           >
-            <option value="random">Random</option>
-            {POSITIONS.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Situation
-          <select
-            value={settings.context}
-            onChange={(e) => updateContext(e.target.value as Context | 'random')}
-          >
-            <option value="random">Random</option>
-            {CONTEXTS.map((c) => (
-              <option
-                key={c}
-                value={c}
-                disabled={
-                  settings.position !== 'random' &&
-                  !validContextsFor(settings.position).includes(c)
-                }
-              >
-                {CONTEXT_LABELS[c]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label
-          className="skew-toggle"
-          title="Deal hands you can play (raise/call) as often as hands you fold, instead of their natural frequency"
-        >
-          <input
-            type="checkbox"
-            checked={!!settings.skew}
-            onChange={(e) => setSettings({ ...settings, skew: e.target.checked })}
-          />
-          Fewer folds
-        </label>
-        <div className="tally">
-          <span className="tally-correct">✓ {tally.correct}</span>
-          <span className="tally-wrong">✗ {tally.wrong}</span>
-          <span>Streak {tally.streak}</span>
-          {accuracy !== null && <span>{accuracy}%</span>}
-          <button className="btn-subtle" onClick={() => setTally(EMPTY_TALLY)}>
-            Reset
-          </button>
+            <input
+              type="checkbox"
+              checked={!!settings.skew}
+              onChange={(e) => setSettings({ ...settings, skew: e.target.checked })}
+            />
+            Fewer folds
+          </label>
+          <div className="tally">
+            <span className="tally-correct">✓ {tally.correct}</span>
+            <span className="tally-wrong">✗ {tally.wrong}</span>
+            <span>Streak {tally.streak}</span>
+            {accuracy !== null && <span>{accuracy}%</span>}
+            <button className="btn-subtle" onClick={() => setTally(EMPTY_TALLY)}>
+              Reset
+            </button>
+          </div>
         </div>
       </div>
 

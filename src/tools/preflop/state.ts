@@ -41,13 +41,31 @@ function migrateLogEntry(e: LogEntry): LogEntry {
   return e
 }
 
+// Settings were single-select ({position, context}) before becoming multi-select.
+interface LegacySettings {
+  position?: Position | 'random'
+  context?: string
+  skew?: boolean
+}
+
+function migrateSettings(s: Settings | LegacySettings): Settings {
+  if ('positions' in s && Array.isArray(s.positions)) return s as Settings
+  const legacy = s as LegacySettings
+  const ctx = legacy.context === 'sb-limped' ? 'vs-limpers' : legacy.context
+  return {
+    positions: legacy.position && legacy.position !== 'random' ? [legacy.position] : [],
+    contexts: ctx && ctx !== 'random' ? [ctx as Context] : [],
+    skew: legacy.skew ?? false,
+  }
+}
+
 export function useSettings() {
-  const [settings, setSettings] = useStoredState<Settings>('preflop:v1:settings', DEFAULT_SETTINGS)
-  const migrated =
-    (settings.context as string) === 'sb-limped'
-      ? { ...settings, context: 'vs-limpers' as Context }
-      : settings
-  return [migrated, setSettings] as const
+  const [raw, setSettings] = useStoredState<Settings | LegacySettings>(
+    'preflop:v1:settings',
+    DEFAULT_SETTINGS,
+  )
+  const settings = useMemo(() => migrateSettings(raw), [raw])
+  return [settings, setSettings as (next: Settings) => void] as const
 }
 
 export function useTally() {

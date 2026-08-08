@@ -58,6 +58,10 @@ log, chart edits, settings) persists in localStorage under `the-course:`-prefixe
   `?? 'fold'` fallback when reading a compiled chart.
 - The old `sb-limped` context and `blinds-vs-limpers` chart were merged into
   `sb-vs-limpers`/`bb-vs-limpers`; `state.ts` migrates stored logs/settings from those ids.
+- Practice settings are multi-select (`positions: Position[]`, `contexts: Context[]`; empty
+  array = any). `state.ts` migrates the older single-select `{position, context}` shape.
+  Impossible intersections (e.g. EP + vs-steal) fall back to the position filter in
+  `generateScenario`; the UI dims chips that can't combine with the other group's selection.
 - Conditional chart lines ("add A5s-A2s… if everyone might fold", "optional trim") are shown
   as notes but deliberately excluded from grading to keep answers deterministic.
 - Deploy is via `.github/workflows/deploy.yml` (actions/deploy-pages). Repo Settings → Pages →

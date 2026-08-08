@@ -162,15 +162,61 @@ code {
 
 /* ---------- practice ---------- */
 
-.settings-bar {
+.settings-panel {
   display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
 }
 
-.settings-bar label {
+.chip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.chip-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  min-width: 5.5rem;
+}
+
+.chip-label em {
+  font-size: 0.75rem;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-dim);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.chip:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.chip-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #10141a;
+  font-weight: 600;
+}
+
+.chip-on:hover {
+  border-color: var(--accent);
+  color: #10141a;
+}
+
+.chip-dim {
+  opacity: 0.4;
+}
+
+.skew-toggle {
   display: flex;
   align-items: center;
   gap: 0.4rem;

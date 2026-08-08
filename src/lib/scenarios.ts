@@ -19,13 +19,15 @@ export interface Scenario {
 }
 
 export interface Settings {
-  position: Position | 'random'
-  context: Context | 'random'
+  /** Positions to practice; empty = any. */
+  positions: Position[]
+  /** Situations to practice; empty = any. */
+  contexts: Context[]
   /** Deal 50/50 between playable hands and default-action (fold/check) hands. */
   skew?: boolean
 }
 
-export const DEFAULT_SETTINGS: Settings = { position: 'random', context: 'random', skew: false }
+export const DEFAULT_SETTINGS: Settings = { positions: [], contexts: [], skew: false }
 
 /** All valid (position, context) pairs. */
 export const VALID_COMBOS: { position: Position; context: Context }[] = POSITIONS.flatMap(
@@ -52,16 +54,18 @@ function pick<T>(arr: T[]): T {
 
 type Overrides = Record<string, Record<HandClass, ActionId>> | undefined
 
-/** Generate a scenario respecting the settings; invalid fixed combos fall back to random. */
+/**
+ * Generate a scenario respecting the settings. Empty selections mean "any";
+ * an impossible intersection falls back to the position filter alone, then to
+ * all valid combos.
+ */
 export function generateScenario(settings: Settings, overrides?: Overrides): Scenario {
-  let combos = VALID_COMBOS
-  if (settings.position !== 'random') {
-    combos = combos.filter((c) => c.position === settings.position)
-  }
-  if (settings.context !== 'random') {
-    const filtered = combos.filter((c) => c.context === settings.context)
-    if (filtered.length > 0) combos = filtered
-  }
+  const posOk = (p: Position) =>
+    settings.positions.length === 0 || settings.positions.includes(p)
+  const ctxOk = (c: Context) => settings.contexts.length === 0 || settings.contexts.includes(c)
+  let combos = VALID_COMBOS.filter((c) => posOk(c.position) && ctxOk(c.context))
+  if (combos.length === 0) combos = VALID_COMBOS.filter((c) => posOk(c.position))
+  if (combos.length === 0) combos = VALID_COMBOS
   const { position, context } = pick(combos)
   const chartId = chartIdFor(position, context)!
   const cards = settings.skew ? dealSkewed(chartId, overrides) : dealCards()
