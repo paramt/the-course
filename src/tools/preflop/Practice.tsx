@@ -56,7 +56,9 @@ export default function Practice() {
   const navigate = useNavigate()
 
   const retry = (location.state as { retry?: Scenario } | null)?.retry
-  const [scenario, setScenario] = useState<Scenario>(() => retry ?? generateScenario(settings))
+  const [scenario, setScenario] = useState<Scenario>(
+    () => retry ?? generateScenario(settings, overrides),
+  )
   const [result, setResult] = useState<Result | null>(null)
 
   // A "Retry" jump from the log loads that exact scenario, then clears the route state.
@@ -70,7 +72,7 @@ export default function Practice() {
 
   function applySettings(next: typeof settings) {
     setSettings(next)
-    setScenario(generateScenario(next))
+    setScenario(generateScenario(next, overrides))
     setResult(null)
   }
 
@@ -125,7 +127,7 @@ export default function Practice() {
   }
 
   function next() {
-    setScenario(generateScenario(settings))
+    setScenario(generateScenario(settings, overrides))
     setResult(null)
   }
 
@@ -210,6 +212,17 @@ export default function Practice() {
               </option>
             ))}
           </select>
+        </label>
+        <label
+          className="skew-toggle"
+          title="Deal hands you can play (raise/call) as often as hands you fold, instead of their natural frequency"
+        >
+          <input
+            type="checkbox"
+            checked={!!settings.skew}
+            onChange={(e) => setSettings({ ...settings, skew: e.target.checked })}
+          />
+          Fewer folds
         </label>
         <div className="tally">
           <span className="tally-correct">✓ {tally.correct}</span>
