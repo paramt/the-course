@@ -105,7 +105,7 @@ export default function Table({
                 className={`bet bet-${s.bet.kind}`}
                 style={pctStyle(isHero ? { x: 37, y: 72 } : polar(k, 27, 23))}
               >
-                <span className="chip" />${s.bet.amount}
+                <span className="bet-chip" />${s.bet.amount}
               </div>
             )}
           </Fragment>

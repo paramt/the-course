@@ -340,22 +340,22 @@ code {
   white-space: nowrap;
 }
 
-.chip {
+.bet-chip {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55), 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.bet-raise .chip {
+.bet-raise .bet-chip {
   background: var(--raise);
 }
 
-.bet-limp .chip {
+.bet-limp .bet-chip {
   background: #4a6fa5;
 }
 
-.bet-post .chip {
+.bet-post .bet-chip {
   background: #6b7686;
 }
 

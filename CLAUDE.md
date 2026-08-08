@@ -23,6 +23,11 @@ log, chart edits, settings) persists in localStorage under `the-course:`-prefixe
 
 ## Gotchas / learnings
 
+- **`styles.css` is one global stylesheet — check for class-name collisions before adding new
+  classes.** The selector "chips" once collided with the table's bet-chip graphic (both
+  `.chip`), shrinking the buttons to 14px ovals in production. jsdom tests can't catch layout
+  breakage; grep for the class name first (bet chips are now `.bet-chip`).
+
 - **Range notation dash forms are ambiguous by shape**: `A5s-A2s` is a kicker run (high card
   fixed), `JTs-76s` is a diagonal run (both ranks step down, gap fixed). The parser
   distinguishes them by whether the high card of both endpoints matches. See `range.test.ts`
