@@ -103,7 +103,7 @@ export default function Table({
             {s.bet && (
               <div
                 className={`bet bet-${s.bet.kind}`}
-                style={pctStyle(isHero ? { x: 37, y: 72 } : polar(k, 27, 23))}
+                style={pctStyle(isHero ? { x: 38, y: 74 } : polar(k, 35, 31))}
               >
                 <span className="bet-chip" />${s.bet.amount}
               </div>
@@ -113,7 +113,7 @@ export default function Table({
       })}
       <div
         className="dealer-button"
-        style={pctStyle(btnK === 0 ? { x: 61, y: 74 } : polar(btnK, 34, 30, -16))}
+        style={pctStyle(btnK === 0 ? { x: 59, y: 78 } : polar(btnK, 38, 34, -9))}
       >
         D
       </div>
